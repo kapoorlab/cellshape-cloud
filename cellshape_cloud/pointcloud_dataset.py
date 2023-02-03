@@ -38,6 +38,35 @@ class PointCloudDataset(Dataset):
 
         return point_cloud, 0, 0, 0
 
+class PointCloudNpzDataset(Dataset):
+    def __init__(self, npz_path, centre=True, scale=20.0):
+        self.npz_path = npz_path
+        self.centre = centre
+        self.scale = scale
+        self.npzdata = np.load(npz_path)
+        self.mesh_data = self.npzdata['mesh'].tolist()
+        self.points_data = self.npzdata['points'].tolist()
+
+    def __len__(self):
+        return len(self.points_data)
+
+    def __getitem__(self, idx):
+        # read the image
+        points = self.points_data[idx]
+
+        point_cloud = PyntCloud(points)
+        mean = 0
+        point_cloud = torch.tensor(point_cloud.points.values)
+        if self.centre:
+            mean = torch.mean(point_cloud, 0)
+
+        scale = torch.tensor([[self.scale, self.scale, self.scale]])
+        point_cloud = (point_cloud - mean) / scale
+
+        return point_cloud, 0, 0, 0    
+    
+
+
 
 class SingleCellDataset(Dataset):
     def __init__(
