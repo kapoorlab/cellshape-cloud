@@ -69,3 +69,4 @@ class CloudAutoEncoder(nn.Module):
         features = self.encoder(x)
         output = self.decoder(x=features)
         return output, features
+
